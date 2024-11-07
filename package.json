@@ -1,5 +1,6 @@
 {
   "name": "fiona-downloader",
+  "productName": "fiona-downloader",
   "version": "1.0.0",
   "description": "Download from FIONA/Exports",
   "config": {
@@ -18,7 +19,10 @@
             "amd64",
             "darwin",
             "arm64"
-          ]
+          ],
+          "config": {
+            "icon": "images/logo/ios/iTunesArtwork@1x.png"
+          }
         }
       ]
     }

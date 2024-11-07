@@ -1,5 +1,5 @@
-const information = document.getElementById('info')
-information.innerText = `This app is using Chrome (v${versions.chrome()}), Node.js (v${versions.node()}), and Electron (v${versions.electron()})`
+//const information = document.getElementById('info')
+//information.innerText = `This app is using Chrome (v${versions.chrome()}), Node.js (v${versions.node()}), and Electron (v${versions.electron()})`
 
 document.getElementById('body').addEventListener("dragover", (event) => {
     event.preventDefault()
@@ -19,11 +19,26 @@ window.electron.receivedTableRow((event, value) => {
     //const oldValue = Number(counter.innerText)
     //const newValue = oldValue + value
     //counter.innerText = newValue
-    var numChildren = table.childNodes.length;
     var node = document.createElement('tr');
     node.id = "item-" + value.id;
-    node.innerHTML = "<td class='table-id'>" + value.id + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'>" + value.status + "</td>";
+    var rowStatus = "download-failed";
+    if (value.status == "downloaded") {
+        rowStatus = "download-success";
+    }
+    node.innerHTML = "<td class='table-id'>" + value.id + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + value.status + "</span></td>";
     table.appendChild(node);
+})
+
+window.electron.updateTableRow((event, value) => {
+    // find the id in the table and update all values
+    var row_id = "item-" + value.id;
+    var tr = document.querySelector('#' + row_id);
+    var rowStatus = "";
+    if (value.status == "downloaded") {
+        rowStatus = "download-success";
+    }
+    // does this replace all values in the row?
+    tr.innerHTML = "<td class='table-id'>" + value.id + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + value.status + "</span></td>";
 })
 
 window.electron.getDownloadProgress((event, value) => {
@@ -32,6 +47,17 @@ window.electron.getDownloadProgress((event, value) => {
     //console.log("got some progress for the download " + value.progress.percent);
     var tr = document.getElementById("item-" + value.id);
     var n = document.createTextNode(Math.round(100*value.progress.percent) + "%");
+    tr.cells[3].innerHTML = '';
+    tr.cells[3].appendChild(n);
+})
+
+window.electron.getDownloadError((event, msg) => {
+    // mark this line as erroneous download
+    var tr = document.getElementById("item-" + msg.id);
+    var n = document.createElement("span");
+    n.setAttribute("title", msg.message);
+    n.classList.add("download-failed");
+    n.appendChild(document.createTextNode("failed"));
     tr.cells[3].innerHTML = '';
     tr.cells[3].appendChild(n);
 })
@@ -73,10 +99,24 @@ window.electron.getDownloadComplete((event, item) => {
     var s = "unknown";
     if (typeof item.fileSize != "undefined")
         s = item.fileSize;
-    var n = document.createTextNode(humanFileSize(s));
+    var n = document.createElement("span");
+    n.classList.add("download-success");
+    n.appendChild(document.createTextNode(humanFileSize(s)));
     tr.cells[3].innerHTML = '';
     tr.cells[3].appendChild(n);
-    console.log("download is complete");
+    //console.log("download is complete");
+})
+
+window.electron.getDownloadExistsAtDestination((event, item) => {
+    var tr = document.getElementById("item-" + item.id);
+    var s = "unknown";
+    if (typeof item.fileSize != "undefined")
+        s = item.fileSize;
+    var n = document.createElement("span");
+    n.classList.add("download-success");
+    n.appendChild(document.createTextNode(humanFileSize(s)));
+    tr.cells[3].innerHTML = '';
+    tr.cells[3].appendChild(n);
 })
 
 const set_directory_button = document.getElementById('set-download-location');

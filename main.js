@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron/main';
+import { app, BrowserWindow, ipcMain, nativeTheme, shell } from 'electron/main';
 import { dialog } from 'electron'
 import path from 'node:path'
 import fs from 'node:fs'
@@ -17,7 +17,7 @@ var credentials = {username: "", password: ""};
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 960,
-    height: 600,
+    height: 430,
     icon: "/images/logo/ios/iTunesArtwork",
     webPreferences: {
       //nodeIntegration: true,
@@ -72,25 +72,13 @@ function sanitize(input, replacement) {
 }
 
 /*  // handle arguments in process.argv  process.argv.slice(2)
-  if (nativeTheme.shouldUseDarkColors) {
-    var win = BrowserWindow.getFocusedWindow();
-    win.webContents.send('set-bootstrap-theme', 'dark');
-  } else {
-      var win = BrowserWindow.getFocusedWindow();
-      win.webContents.send('set-bootstrap-theme', 'light');
-  }
-
-app.on("browser-window-created", (event) => {
-  if (nativeTheme.shouldUseDarkColors) {
-    //var webContents = event.sender;
-    BrowserWindow.getFocusedWindow().webContents.send('set-bootstrap-theme', 'dark');
-  } else {
-    //var webContents = event.sender;
-    BrowserWindow.getFocusedWindow().send('set-bootstrap-theme', 'light');
-  }
-}) */
+ */
 
 app.whenReady().then(() => {
+  if (current_download_location == "") {
+    current_download_location = app.getPath("downloads"); // some default directory
+  }
+
   ipcMain.handle('ping', () => 'pong')
   ipcMain.handle('read-file-list', (event, filename) => {
     var fn = path.join(__dirname, sanitize(filename));
@@ -99,6 +87,11 @@ app.whenReady().then(() => {
       return;
     }
     console.log("handling read-file-list" + fn);
+    const webContents = event.sender
+    const win = BrowserWindow.fromWebContents(webContents)
+
+    win.setRepresentedFilename(fn);
+    win.setDocumentEdited(true);
     const fileContent = fs.readFileSync(fn, { encoding: 'utf-8' });
     var lines = fileContent.split("\n");
     for (var i = 0; i < lines.length; i++) {
@@ -108,8 +101,6 @@ app.whenReady().then(() => {
       if (trimmed.length == 0)
         continue;
       var pieces = trimmed.split(",")
-      const webContents = event.sender
-      const win = BrowserWindow.fromWebContents(webContents)
       // accept this as a filename and send to render to be put into table
       var status = "";
       var p = path.join(current_download_location, pieces[0]);
@@ -124,12 +115,26 @@ app.whenReady().then(() => {
   ipcMain.handle('set-download-location', async (event, operation) => {
     const properties = operation === 'export' ? ['openDirectory', 'createDirectory'] : ['openDirectory'];
     const result = await dialog.showOpenDialog({
-        properties: properties
+        properties: properties,
+        defaultPath: current_download_location
     });
     if (result.canceled) {
         return null;
     } else {
         current_download_location = result.filePaths[0];
+        // TODO: update all the status fields again (files might exist already at these locations)
+        for (var i = 0; i < current_data.length; i++) {
+          // ask for an update on the status for this item
+          var status = "";
+          var p = path.join(current_download_location, current_data[i].pathname);
+          if (fs.existsSync(p)) {
+            status = "downloaded";
+          }
+          var dat = { id: current_data[i].id, pathname: current_data[i].pathname, MD5SUM: current_data[i].MD5SUM, status: status };
+          const webContents = event.sender
+          const win = BrowserWindow.fromWebContents(webContents)
+          win.webContents.send('update-table-row', dat);
+        }
         return result.filePaths[0];
     }
   });
@@ -145,9 +150,9 @@ app.whenReady().then(() => {
     //const win = BrowserWindow.fromWebContents(webContents)
 
     // all files that have not been downloaded yet is in current_data
-    if (current_download_location == "") {
-      current_download_location = app.getPath("userData"); // some default directory
-    }
+    //if (current_download_location == "") {
+    //  current_download_location = app.getPath("userData"); // some default directory
+    //}
 
     // how much data do we need to download?
     var totalNumFiles = 0;
@@ -165,8 +170,12 @@ app.whenReady().then(() => {
       // check if that file already exists in the current_download_location
       var p = path.join(current_download_location, current_data[i].pathname);
       if (fs.existsSync(p)) {
-        var item = { id: current_data[i].id };
-        win.webContents.send("download-complete", item)
+        // create a fake progress
+        var item = { id: current_data[i].id, fileSize: 0 };
+        fs.stat(p, (err, fileStats) => {
+          item.fileSize = fileStats.size;
+          win.webContents.send("download-exists-at-destination", item)  
+        });
         continue; // skip this entry
       }
       // what is the total size to download?
@@ -197,11 +206,13 @@ app.whenReady().then(() => {
           console.log("Canceled download for item: " + JSON.stringify(item));
         }
       }).catch((error) => {
-        console.log("got an error downloading: " + error);
+        //console.log("got an error downloading: " + error); // mark the status for this file with error message
+        var item = { id: current_data[i].id, message: error };
+        win.webContents.send("download-error", item)
       })
     }
-
-
+    // all downloads finished
+    shell.openPath(current_download_location)
   });
 
   createWindow()
@@ -233,7 +244,7 @@ function createAuthPrompt() {
     modal: true,
     parent: BrowserWindow.getFocusedWindow(),
     width: 350,
-    height: 250,
+    height: 280,
     title: "FIONA credentials",
     webPreferences: {
       //nodeIntegration: true,
@@ -244,6 +255,14 @@ function createAuthPrompt() {
   
   authPromptWin.on('ready-to-show', function() {
     authPromptWin.show();
+
+    if (nativeTheme.shouldUseDarkColors) {
+      authPromptWin.webContents.send('set-bootstrap-theme', 'dark');
+    } else {
+      console.log("Light Theme Chosen by User");
+      authPromptWin.webContents.send('set-bootstrap-theme', 'light');
+    }
+
   });
 
   authPromptWin.loadFile("auth-form.html"); // load your html f
