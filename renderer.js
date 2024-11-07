@@ -25,7 +25,7 @@ window.electron.receivedTableRow((event, value) => {
     if (value.status == "downloaded") {
         rowStatus = "download-success";
     }
-    node.innerHTML = "<td class='table-id'>" + value.id + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + value.status + "</span></td>";
+    node.innerHTML = "<td class='table-id'>" + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + value.status + "</span></td>";
     table.appendChild(node);
 })
 
@@ -38,8 +38,9 @@ window.electron.updateTableRow((event, value) => {
         rowStatus = "download-success";
     }
     // does this replace all values in the row?
-    tr.innerHTML = "<td class='table-id'>" + value.id + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + value.status + "</span></td>";
+    tr.innerHTML = "<td class='table-id'>" + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + value.status + "</span></td>";
 })
+
 
 window.electron.getDownloadProgress((event, value) => {
     // go to that row and update the status
@@ -49,6 +50,7 @@ window.electron.getDownloadProgress((event, value) => {
     var n = document.createTextNode(Math.round(100*value.progress.percent) + "%");
     tr.cells[3].innerHTML = '';
     tr.cells[3].appendChild(n);
+    var a = document.createElement("div");
 })
 
 window.electron.getDownloadError((event, msg) => {
@@ -65,6 +67,13 @@ window.electron.getDownloadError((event, msg) => {
 window.electron.getTotalDownloadProgress((event, value) => {
     const progressBar = document.querySelector("progress-bar");
     progressBar.setAttribute("aria-valuenow", Math.round(100*value.progress.percent));
+})
+
+window.electron.setStorageLocation((event, location) => {
+    console.log("got a setStorageLocation call with " + location);
+    var n = document.createTextNode(location);
+    document.querySelector("span.storage-location").innerHTML = '';
+    document.querySelector("span.storage-location").appendChild(n);
 })
 
 window.electron.setBootstrapTheme((event, value) => {

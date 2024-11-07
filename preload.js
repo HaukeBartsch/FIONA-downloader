@@ -35,7 +35,12 @@ contextBridge.exposeInMainWorld('electron', {
     updateTableRow: (callback) => {
         ipcRenderer.on('update-table-row', callback)
     },
+    setStorageLocation: (callback) => {
+        // we only want to update a user interface element with the name
+        ipcRenderer.on("update-storage-location", callback);
+    },
     setDownloadLocation: (location) => { // 
+        // we want to open a dialog to set a new download location
         ipcRenderer.invoke("set-download-location", location);
     },
     startDownload: () => {
