@@ -10,6 +10,11 @@ document.getElementById('body').addEventListener("drop", (event) => {
     //read-file-list
 })
 
+var ok_icon = `<svg width="20px" height="20px" viewBox="0 0 48 48" version="1" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 48 48">
+    <circle fill="#4CAF50" cx="24" cy="24" r="21"/>
+    <polygon fill="#CCFF90" points="34.6,14.6 21,28.2 15.4,22.6 12.6,25.4 21,33.8 37.4,17.4"/>
+</svg>`;
+
 //document.getElementById('submit-login-form').addEventListener("click", function(event) {
 //    console.log("Submit button was clicked!!!");
 //})
@@ -22,10 +27,12 @@ window.electron.receivedTableRow((event, value) => {
     var node = document.createElement('tr');
     node.id = "item-" + value.id;
     var rowStatus = "download-failed";
+    var icon = "";
     if (value.status == "downloaded") {
         rowStatus = "download-success";
+        icon = ok_icon;
     }
-    node.innerHTML = "<td class='table-id'>" + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + value.status + "</span></td>";
+    node.innerHTML = "<td class='table-id'>" + icon + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + value.status + "</span></td>";
     table.appendChild(node);
 })
 
@@ -34,11 +41,13 @@ window.electron.updateTableRow((event, value) => {
     var row_id = "item-" + value.id;
     var tr = document.querySelector('#' + row_id);
     var rowStatus = "";
+    var icon = "";
     if (value.status == "downloaded") {
         rowStatus = "download-success";
+        icon = ok_icon;
     }
     // does this replace all values in the row?
-    tr.innerHTML = "<td class='table-id'>" + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + value.status + "</span></td>";
+    tr.innerHTML = "<td class='table-id'>" + icon + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + value.status + "</span></td>";
 })
 
 
@@ -113,6 +122,8 @@ window.electron.getDownloadComplete((event, item) => {
     n.appendChild(document.createTextNode(humanFileSize(s)));
     tr.cells[3].innerHTML = '';
     tr.cells[3].appendChild(n);
+    var icon = ok_icon;
+    tr.cells[0].innerHTML = icon;
     //console.log("download is complete");
 })
 

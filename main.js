@@ -10,6 +10,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import Store from 'electron-store';
+
+const store = new Store();
+
 var current_data = []; // keep a record on the server for what we forward to the viewer
 var current_download_location = "";
 var credentials = {username: "", password: ""};
@@ -19,7 +23,7 @@ var command_line_args =  process.argv;
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 960,
-    height: 430,
+    height: 420,
     icon: "/images/logo/ios/iTunesArtwork",
     webPreferences: {
       //nodeIntegration: true,
@@ -124,7 +128,9 @@ const createWindow = () => {
   */
   
   app.whenReady().then(() => {
-    if (current_download_location == "") {
+    current_download_location = store.get('current_download_location');
+
+    if (typeof current_download_location == "undefined") { // undefined if not exist in store
       current_download_location = app.getPath("downloads"); // some default directory
     }
     
@@ -172,6 +178,8 @@ const createWindow = () => {
         return null;
       } else {
         current_download_location = result.filePaths[0];
+        // store that location
+        store.set('current_download_location', current_download_location);
 
         const webContents = event.sender
         const win = BrowserWindow.fromWebContents(webContents)

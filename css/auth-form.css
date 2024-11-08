@@ -1,0 +1,90 @@
+div.container {
+    margin-top: 20px;
+}
+
+form {
+    padding: 20px 0;
+    position: relative;
+    z-index: 2;
+}
+form input{
+    display: block;
+    appearance: none;
+    outline: 0;
+    border: 1px solid fade(white, 40%);
+    background-color: fade(white, 20%);
+    width: 250px;
+    
+    border-radius: 3px;
+    padding: 10px 15px;
+    margin: 0 auto 10px auto;
+    display: block;
+    text-align: center;
+    font-size: 18px;
+    
+    color: gray;
+    
+    transition-duration: 0.25s;
+    font-weight: 300;
+}
+form input:hover{
+    background-color: fade(white, 40%);
+}
+
+form input:focus{
+    background-color: white;
+    width: 300px;
+    
+    color: gray;
+}
+
+form button {
+
+    margin: 0 auto 10px auto;
+    display: block;
+    text-align: center;
+
+    appearance: none;
+    outline: 0;
+    background-color: white;
+    border: 0;
+    padding: 10px 15px;
+    color: gray;
+    border-radius: 3px;
+    width: 250px;
+    cursor: pointer;
+    font-size: 18px;
+    transition-duration: 0.25s;
+}     
+
+form button:hover{
+    background-color: rgb(245, 247, 249);
+}
+
+body {        
+        --color__bg: #e8f0f7;
+        --color__progress: #4285f4;
+        --color__progress_text: #eee;
+}
+
+@media (prefers-color-scheme: dark) {
+	body { background: #222; color: white; }
+
+	td.table-id, td.table-name, td.table-md5sum {
+		color: lightblue;
+	}	
+	.label {
+		color: var(--color__progress_text);
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	body { background: #fff; color: black; }
+
+	td.table-id, td.table-name, td.table-md5sum {
+		color: darkslategray;
+	}	
+	.label {
+		color: var(--color__progress);
+	}
+}
