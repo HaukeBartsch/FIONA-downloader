@@ -139,8 +139,12 @@ window.electron.getDownloadExistsAtDestination((event, item) => {
     tr.cells[3].appendChild(n);
 })
 
-const set_directory_button = document.getElementById('set-download-location');
-set_directory_button.addEventListener("click", function(event) {
+//const set_directory_button = document.getElementById('set-download-location');
+//set_directory_button.addEventListener("click", function(event) {
+//    window.electron.setDownloadLocation();
+//})
+const set_directory_a = document.getElementById('download-to-text-button');
+set_directory_a.addEventListener("click", function(event) {
     window.electron.setDownloadLocation();
 })
 

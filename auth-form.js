@@ -13,3 +13,22 @@ submitFormButton.addEventListener("click", function(event) {
     //window.electron.getLoginCredentials(un, pw);
     // close this window?
 });
+
+const closeButton = document.querySelector("button.btn-close");
+closeButton.addEventListener("click", function() {
+    // close this window
+    window.myAPI.closeDialog();
+});
+
+window.myAPI.setBootstrapTheme((event, value) => {
+    // set-bootstrap-theme
+    document.documentElement.setAttribute('data-bs-theme',value);
+    // change the close button and remove white etc..
+    console.log("got a myAPI set bootstrap theme with " + JSON.stringify(value));
+    // switch the button class
+    if (value == "dark") {
+        closeButton.classList.add("btn-close-white");
+    } else {
+        closeButton.classList.remove("btn-close-white");
+    }
+})

@@ -88,3 +88,9 @@ body {
 		color: var(--color__progress);
 	}
 }
+
+#close-button {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+}

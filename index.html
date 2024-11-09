@@ -18,7 +18,7 @@
   <body id="body" class="d-flex flex-column h-100">
     <main class="flex-shrink-0">
       <div class="container-fluid">
-        <div class="row">
+        <div class="row flex-grow-1">
           <div class="col-3 left-side-div">
             <span class="FIONA-NAME">FIONA</span><br/>
             <span class="FIONA-NAME-SUB">Downloader</span>
@@ -52,7 +52,7 @@
               </table>
             </div>
             <div class="buttons-div">
-              <button class="btn btn-secondary btn-sm" id="set-download-location">Set Location</button>
+             <!-- <button class="btn btn-secondary btn-sm" id="set-download-location">Set Location</button> -->
               <button class="btn btn-primary btn-sm" id="start-download">Download</button>
             </div>
           </div>
@@ -62,7 +62,7 @@
     <footer class="footer mt-auto py-1 bg-body-tertiary">
       <div class="container-fluid row">
         <div class="col"><span class="text-muted">Hauke Bartsch @2024</span></div>
-        <div class="col">download to: <span class="text-muted storage-location"></span></div>
+        <div class="col"><a class="download-to-text-button" id="download-to-text-button" href="#">download to:</a><span class="text-muted storage-location"></span></div>
       </div>
     </footer>
 

@@ -7,5 +7,8 @@ contextBridge.exposeInMainWorld('myAPI', {
   },
   setBootstrapTheme: (callback) => {
     ipcRenderer.on('set-bootstrap-theme', callback);
+  },
+  closeDialog: () => {
+    ipcRenderer.invoke('close-dialog')
   }
 })

@@ -14,6 +14,8 @@ import Store from 'electron-store';
 
 const store = new Store();
 
+var endpoint_url = "http://localhost:3000/index.php?filename="; // filename is appended to this string
+
 var current_data = []; // keep a record on the server for what we forward to the viewer
 var current_download_location = "";
 var credentials = {username: "", password: ""};
@@ -23,7 +25,7 @@ var command_line_args =  process.argv;
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 960,
-    height: 420,
+    //height: 420,
     icon: "/images/logo/ios/iTunesArtwork",
     webPreferences: {
       //nodeIntegration: true,
@@ -195,6 +197,7 @@ const createWindow = () => {
           var dat = { id: current_data[i].id, pathname: current_data[i].pathname, MD5SUM: current_data[i].MD5SUM, status: status };
           win.webContents.send('update-table-row', dat);
         }
+        win.webContents.send('total-download-progress', { progress: { percent: 0 } })
         return result.filePaths[0];
       }
     });
@@ -226,7 +229,7 @@ const createWindow = () => {
       var accumulatedSize = 0; // when we are finished add
       for (var i = 0; i < current_data.length; i++) {
         const win = BrowserWindow.fromWebContents(webContents);
-        var url = "http://localhost:3000/index.php?filename=" + current_data[i].pathname;
+        var url = endpoint_url + current_data[i].pathname;
         // check if that file already exists in the current_download_location
         var p = path.join(current_download_location, current_data[i].pathname);
         if (fs.existsSync(p)) {
@@ -239,13 +242,14 @@ const createWindow = () => {
           continue; // skip this entry
         }
         // what is the total size to download?
-        
+        var cancelAll = false;
         await download(win /*BrowserWindow.getFocusedWindow()*/, url, {
           filename: current_data[i].pathname,
           directory: current_download_location,
           onProgress: (progress) => {
             console.log("got a single file progress: " + JSON.stringify(progress));
-            win.webContents.send("download-progress", { progress: progress, id: current_data[i].id });
+            if (typeof current_data != "undefined" && current_data.length > i && typeof current_data[i].id != "undefined")
+              win.webContents.send("download-progress", { progress: progress, id: current_data[i].id });
           },
           onTotalProgress: (progress) => {
             // download across all files
@@ -258,18 +262,24 @@ const createWindow = () => {
           onCompleted: (item) => {
             accumulatedSize += item.fileSize;
             console.log("onComplete for " + JSON.stringify(item));
-            item.id = current_data[i].id;
-            win.webContents.send("download-complete", item)
+            if (typeof current_data != "undefined" && current_data.length > i && typeof current_data[i].id != "undefined") {
+              item.id = current_data[i].id;
+              win.webContents.send("download-complete", item)
+            }
           },
           onCancel: (item) => {
             // download failed
+            cancelAll = true;
             console.log("Canceled download for item: " + JSON.stringify(item));
           }
         }).catch((error) => {
           //console.log("got an error downloading: " + error); // mark the status for this file with error message
           var item = { id: current_data[i].id, message: error };
-          win.webContents.send("download-error", item)
+          win.webContents.send("download-error", item);
+          console.log("Got an error with this download, but only this one file. Try the next one...");
         })
+        if (cancelAll)
+          break;
       }
       // all downloads finished
       shell.openPath(current_download_location)
@@ -279,7 +289,7 @@ const createWindow = () => {
     
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()
-      })
+    })
     
     app.on('login', async (event, webContents, request, authInfo, callback) => {
       event.preventDefault();
@@ -288,7 +298,12 @@ const createWindow = () => {
         credentials.username = creds.username;
         credentials.password = creds.password;
         //console.log(credentials.username + " " + credentials.password);
-        callback(credentials.username, credentials.password);
+        if (creds.username.length > 0 && creds.password.length > 0)
+          callback(credentials.username, credentials.password);
+        else {
+          // need to cancel the login, but returning callback() is the same as wrong credentials, so it comes up again
+          return false;
+        }
       },
       reason => {
         console.log("failed in createAuthPrompt" + reason);
@@ -304,7 +319,7 @@ const createWindow = () => {
       modal: true,
       parent: BrowserWindow.getFocusedWindow(),
       width: 350,
-      height: 280,
+      height: 270,
       title: "FIONA credentials",
       webPreferences: {
         //nodeIntegration: true,
@@ -338,6 +353,13 @@ const createWindow = () => {
         };
         resolve(credentials);
       });
+      ipcMain.handleOnce("close-dialog", (event) => {
+        // remove the handler from form-submission if we cancel
+        ipcMain.removeHandler("form-submission");
+        if (!authPromptWin.isDestroyed())
+          authPromptWin.close();
+        resolve({ username: '', password: '' });
+      })
     });
   }
   
