@@ -54,6 +54,9 @@ contextBridge.exposeInMainWorld('electron', {
     },
     getDownloadComplete: (callback) => {
         ipcRenderer.on('download-complete', callback)
+    }, // checksum-message
+    getChecksumMessage: (callback) => {
+        ipcRenderer.on('checksum-message', callback)
     },
     getDownloadError: (callback) => {
         ipcRenderer.on('download-error', callback)

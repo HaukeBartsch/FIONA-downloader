@@ -16,6 +16,24 @@ const store = new Store();
 
 var endpoint_url = "http://localhost:3000/index.php?filename="; // filename is appended to this string
 
+import crypto from 'crypto'
+
+function getChecksum(path) {
+    return new Promise((resolve, reject) => {
+      // if absolutely necessary, use md5
+      const hash = crypto.createHash('md5');
+      const input = fs.createReadStream(path);
+      input.on('error', reject);
+      input.on('data', (chunk) => {
+          hash.update(chunk);
+      });
+      input.on('close', () => {
+          resolve(hash.digest('hex'));
+      });
+    });
+}
+
+
 var current_data = []; // keep a record on the server for what we forward to the viewer
 var current_download_location = "";
 var credentials = {username: "", password: ""};
@@ -266,6 +284,19 @@ const createWindow = () => {
               item.id = current_data[i].id;
               win.webContents.send("download-complete", item)
             }
+            var md5sum = current_data[i].MD5SUM;
+            var id = current_data[i].id;
+            // check for the MD5SUM and report if that worked as well
+            getChecksum(p)
+              .then(function(checksum) {
+                // compare and alert the authorities
+                if (checksum != md5sum) {
+                  win.webContents.send("checksum-message", { "ok": "failed", id: id })
+                } else {
+                  win.webContents.send("checksum-message", { "ok": "ok", id: id })
+                }
+                console.log(`checksum is ${checksum}`)
+              }).catch(err => console.log(err));
           },
           onCancel: (item) => {
             // download failed

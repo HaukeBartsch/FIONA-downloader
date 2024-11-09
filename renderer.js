@@ -127,6 +127,19 @@ window.electron.getDownloadComplete((event, item) => {
     //console.log("download is complete");
 })
 
+window.electron.getChecksumMessage((event, item) => {
+    // data.id 
+    // data.ok contains either checksum correct or incorrect
+    var tr = document.getElementById("item-" + item.id);
+    if (item.ok == "ok") {
+        tr.cells[2].classList.remove("checksum-failed");
+        tr.cells[2].classList.add("checksum-ok");
+    } else {
+        tr.cells[2].classList.remove("checksum-ok")
+        tr.cells[2].classList.add("checksum-failed");
+    }
+});
+
 window.electron.getDownloadExistsAtDestination((event, item) => {
     var tr = document.getElementById("item-" + item.id);
     var s = "unknown";

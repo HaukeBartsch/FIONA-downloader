@@ -30,6 +30,13 @@ html,body,main,div.container-fluid,div.row {
 	color: lightgreen;
 }
 
+td.table-md5sum.checksum-failed {
+	color: red;
+}
+td.table-md5sum.checksum-ok {
+	color: lightgreen;
+}
+
 td.status {
 	text-align: end;
 }
