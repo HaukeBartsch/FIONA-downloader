@@ -27,14 +27,14 @@ html,body,main,div.container-fluid,div.row {
 	color: red;
 }
 #downloads span.download-success {
-	color: lightgreen;
+	color: darkseagreen;
 }
 
 td.table-md5sum.checksum-failed {
 	color: red;
 }
 td.table-md5sum.checksum-ok {
-	color: lightgreen;
+	color: darkseagreen;
 }
 
 td.status {
@@ -48,6 +48,9 @@ th.status-header {
 	height: 300px;
 	overflow: auto;
 	flex: 1 1 auto;
+}
+#tableWrap td {
+	white-space: nowrap;
 }
 
 div.buttons-div {
@@ -73,6 +76,10 @@ footer {
 	overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+footer div.normal-text {
+	padding-top: 4px;
 }
 
 #table-download-items {

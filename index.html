@@ -19,7 +19,7 @@
     <main class="flex-shrink-0">
       <div class="container-fluid">
         <div class="row flex-grow-1">
-          <div class="col-3 left-side-div">
+          <div class="col-3 d-none d-md-block left-side-div">
             <span class="FIONA-NAME">FIONA</span><br/>
             <span class="FIONA-NAME-SUB">Downloader</span>
             <hr>
@@ -44,9 +44,9 @@
             </div>
 
           </div>
-          <div class="col-9 right-side-div">
+          <div class="col right-side-div">
             <div id="tableWrap">
-              <table class="table table-sm" id="table-download-items">
+              <table class="table table-sm table-striped" id="table-download-items">
                 <thead><tr><th></th><th>package</th><th>checksum</th><th class="status-header">status</th></tr></thead>
                 <tbody id="downloads"></tbody>
               </table>
@@ -61,7 +61,7 @@
     </main>
     <footer class="footer mt-auto py-1 bg-body-tertiary">
       <div class="container-fluid row">
-        <div class="col"><span class="text-muted">Hauke Bartsch @2024</span></div>
+        <div class="col normal-text"><span class="text-muted">Hauke Bartsch @2024</span></div>
         <div class="col"><a class="download-to-text-button" id="download-to-text-button" href="#">download to:</a><span class="text-muted storage-location"></span></div>
       </div>
     </footer>

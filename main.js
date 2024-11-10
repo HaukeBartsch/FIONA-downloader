@@ -251,13 +251,27 @@ const createWindow = () => {
         // check if that file already exists in the current_download_location
         var p = path.join(current_download_location, current_data[i].pathname);
         if (fs.existsSync(p)) {
-          // create a fake progress
-          var item = { id: current_data[i].id, fileSize: 0 };
-          fs.stat(p, (err, fileStats) => {
-            item.fileSize = fileStats.size;
-            win.webContents.send("download-exists-at-destination", item)  
-          });
-          continue; // skip this entry
+          // still check for the md5sum, download again if that is not correct
+          var md5sum = current_data[i].MD5SUM;
+          var id = current_data[i].id;
+          var continueHere = false;
+          await getChecksum(p)
+            .then(function(checksum) {
+              if (md5sum == checksum) {
+                win.webContents.send("checksum-message", { "ok": "ok", id: id })
+                // create a fake progress
+                var item = { id: current_data[i].id, fileSize: 0 };
+                fs.stat(p, (err, fileStats) => {
+                  item.fileSize = fileStats.size;
+                  win.webContents.send("download-exists-at-destination", item)  
+                });
+                continueHere = true;
+              } else {
+                win.webContents.send("checksum-message", { "ok": "failed", id: id })
+              }
+            });
+            if (continueHere)
+              continue; // skip this entry
         }
         // what is the total size to download?
         var cancelAll = false;
