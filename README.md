@@ -1,8 +1,18 @@
+# FIONA downloader
+
+![Interface](https://github.com/HaukeBartsch/FIONA-downloader/blob/main/images/interface.png)
+
+Download an instruction file (data.fiona) from FIONA. Load the .fiona file and specify a local directly to store the exported files.
+
+## Build  
+
+```bash
 npm run make -- --arch="arm64,x64"
+```
 
 ## Test server
 
-```
+```bash
 php -d max_execution_time=60 -S localhost:3000 
 ```
 
