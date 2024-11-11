@@ -36,7 +36,9 @@ npm run make -- --arch="arm64,x64"
 ## Test server
 
 ```bash
+cd test-server
 php -d max_execution_time=60 -S localhost:3000 
+open http://localhost:3000
 ```
 
 ### User testing 
