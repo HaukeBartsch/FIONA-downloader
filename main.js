@@ -39,8 +39,13 @@ const isMac = process.platform === 'darwin'
 var current_data = []; // keep a record on the server for what we forward to the viewer
 var current_download_location = "";
 var credentials = {username: "", password: ""};
+var open_fiona_file_now = "";
 
-var command_line_args =  process.argv;
+// in case we are started with the name of a data.fiona file, try to load it instead of opening the load dialog
+var command_line_args = [];
+if (process.argv.length >= 2) {
+  command_line_args = process.argv;
+}
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -138,25 +143,37 @@ const createWindow = () => {
         
         // TODO: does not contain command line arguments when started with
         // npm start -- a_file_name
-        console.log("got a command line argument here as: " + JSON.stringify(command_line_args))
-        
-        // Ask user to load a .fiona file.
-        // TODO: Only do this if the user did not start by double-clicking on a 
-        // .fiona file, use that instead.
-        dialog.showOpenDialog(win, { 
-          properties: ['openFile', 'multiSelections'], 
-          filters: [ { name: 'FIONA download files', extensions: ['.fiona'] }] }).then((fileNames) => {
-            if (fileNames === undefined){
-              console.log("No file selected");
-              return;
-            }
-            // do a read-file-list now
-            for (var i = 0; i < fileNames.filePaths.length; i++) {
-              // read in that .fiona
-              readDotFiona(win, fileNames.filePaths[i])
-            }        
-          });
+        // console.log("got a command line argument here as: " + JSON.stringify(command_line_args))
+        var success = false;
+        // for windows, on macos listen to open-file event
+        if (process.platform == 'win32' && command_line_args.length > 0) {
+          //win.webContents.send("message", JSON.stringify(command_line_args))
+          success = readDotFiona(win, command_line_args[1]); // might not work
+        }
+        // on macos we receive a file open signal (stored in open_file_file_now)
+        if (open_fiona_file_now.length != 0) {
+          success = readDotFiona(win, open_fiona_file_now); // might not work
+        }
+        if (!success) {          
+          // Ask user to load a .fiona file.
+          // TODO: Only do this if the user did not start by double-clicking on a 
+          // .fiona file, use that instead.
+          dialog.showOpenDialog(win, { 
+            properties: ['openFile', 'multiSelections'], 
+            filters: [ { name: 'FIONA download files', extensions: ['.fiona'] }] }).then((fileNames) => {
+              if (fileNames === undefined){
+                console.log("No file selected");
+                return;
+              }
+              // do a read-file-list now
+              for (var i = 0; i < fileNames.filePaths.length; i++) {
+                // read in that .fiona
+                readDotFiona(win, fileNames.filePaths[i])
+              }        
+            });
+          }
         });
+        
         
         nativeTheme.on("updated", () => {
           console.log("Theme update event");
@@ -191,6 +208,12 @@ const createWindow = () => {
       
       // read a .fiona file exported from Exports
       function readDotFiona(win, fn) {
+        // check if we have a correct file here
+        if (fs.existsSync(fn)) {
+          if (path.extname(fn) != ".fiona")
+            return false; // do nothing, not a file file
+        }
+
         win.setRepresentedFilename(fn);
         win.setDocumentEdited(true);
         const fileContent = fs.readFileSync(fn, { encoding: 'utf-8' });
@@ -212,6 +235,7 @@ const createWindow = () => {
           current_data[current_data.length] = dat;
           win.webContents.send('create-table-row', dat);
         }
+        return true;
       }
       
       /*  // handle arguments in process.argv  process.argv.slice(2)
@@ -484,4 +508,17 @@ const createWindow = () => {
         }
       })
       
-      
+      app.on('open-file', (event, path) => {
+            event.preventDefault();
+            console.log("start loading an external file " + path);
+            open_fiona_file_now = path;
+            // win does not exist yet
+            // win.webContents.send("message", "in open-file event on app" + JSON.stringify(command_line_args))
+      });
+
+      // can we use this for something?
+      //      window.addEventListener('online',  () => {})
+      //      window.addEventListener('offline',  () => {})
+
+      // TODO: We should test if fiona is up before we allow downloads from it.
+      //       See this: https://stackoverflow.com/questions/45932650/how-to-check-if-a-url-or-a-webservice-is-alive-in-nodejs

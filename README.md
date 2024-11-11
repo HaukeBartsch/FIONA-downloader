@@ -29,8 +29,11 @@ The downloader will test each downloaded file based on the MD5SUM to verify that
 
 ## Build  
 
+Use electron-builder as a "devDependencies" entry in package.json. Build for all platforms with:
+
 ```bash
-npm run make -- --arch="arm64,x64"
+# npm run make -- --arch="arm64,x64"
+./node_modules/.bin/electron-builder -mwl
 ```
 
 ## Test server
@@ -50,4 +53,9 @@ open http://localhost:3000
 > - Download all data, find out what went wrong
 
 
-Feedback 1: Immediately made the window higher. File selection box is in the way. Press download button without setting download location. Tried to click on failed row and on "failed" nothing happens. Cannot close username/password dialog.
+Feedback 1: 
+- Immediately made the window higher: Window is now higher - more square. 
+- File selection box is in the way: Still opens up automatically but can be canceled and new File/Load function. 
+- Press download button without setting download location: TODO 
+- Tried to click on failed row and on "failed" nothing happens: TODO 
+- Cannot close username/password dialog: Added close icon on top right. Changed "Login" to "Login to FIONA".

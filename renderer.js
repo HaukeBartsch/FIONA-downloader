@@ -85,6 +85,11 @@ window.electron.setStorageLocation((event, location) => {
     document.querySelector("span.storage-location").appendChild(n);
 })
 
+window.electron.sendMessage((event, msg) => {
+    console.log("received message: " + msg);
+    alert(msg);
+})
+
 window.electron.setBootstrapTheme((event, value) => {
     // set-bootstrap-theme
     document.documentElement.setAttribute('data-bs-theme',value);

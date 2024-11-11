@@ -39,6 +39,9 @@ contextBridge.exposeInMainWorld('electron', {
         // we only want to update a user interface element with the name
         ipcRenderer.on("update-storage-location", callback);
     },
+    sendMessage: (callback) => {
+        ipcRenderer.on("message", callback)
+    },
     setDownloadLocation: (location) => { // 
         // we want to open a dialog to set a new download location
         ipcRenderer.invoke("set-download-location", location);
