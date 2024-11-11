@@ -11,6 +11,21 @@ i) Download an instruction file (data.fiona) from FIONA. ii) Load the .fiona fil
  - *Does it need to communicate with any other application on the system?* No, the application does not depend on any other application on the system.
  - *Are there dependencies on other software, SDKs etc.?* The applications comes with all dependencies packaged inside the installer. It is build using a set of electron.js packages (see packages.json), such as electron-dl and electron-store.
 
+### Details
+
+The .fiona file is a simple text file with two comma separated values (filename, MD5SUM). 
+
+```csv
+# an example FIONA downloader file to pull data from a project
+Command_Line_Tools_for_Xcode_15.3.dmg,68c4eb65b578d9e8165af18845aa6161
+ISLES-2022.zip,302ee280373cdd5c190ab763d72a7a50
+redcap14.2.1.zip,0ce24bc5bf9581fffdee25329b225f35
+freesurfer-linux-centos8_x86_64-7.4.1.tar.gz,93d67e5c811d80a82260ea5b4846dae3
+Obsidian-1.4.16-universal.dmg,c0e51932794b743e1bd33c7c48b03c2c
+```
+
+The downloader will test each downloaded file based on the MD5SUM to verify that the download was successful. If the output folder already contains some or all of the files the MD5SUM will be tested again but only new files will download.
+
 
 ## Build  
 
