@@ -76,6 +76,15 @@ window.electron.getDownloadError((event, msg) => {
 window.electron.getTotalDownloadProgress((event, value) => {
     const progressBar = document.querySelector("progress-bar");
     progressBar.setAttribute("aria-valuenow", Math.round(100*value.progress.percent));
+
+    // add the detailed info to the lower bar
+    if (typeof value.progress.totalBytes != "undefined") {
+        const transfer_info = document.getElementById("download-numbers");
+        // progress.transferredBytes/ progress.totalBytes
+        var n = document.createTextNode(humanFileSize(value.progress.transferredBytes) + " / " + humanFileSize(value.progress.totalBytes) );
+        transfer_info.innerHTML = '';
+        transfer_info.appendChild(n);    
+    }
 })
 
 window.electron.setStorageLocation((event, location) => {

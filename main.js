@@ -189,7 +189,7 @@ const createWindow = () => {
           }
         });
         
-        win.webContents.openDevTools();
+        //win.webContents.openDevTools();
       }
       
       var illegalRe = /[\/\?<>\\:\*\|":]/g;
@@ -382,8 +382,8 @@ const createWindow = () => {
                 console.log("got a total progress, TODO" + JSON.stringify(progress));
                 // sum of current size and accumulatedSize from before
                 var s = (i * (1/totalNumFiles)) + ((1/totalNumFiles)*(progress.transferredBytes/ progress.totalBytes));
-                var progress = { percent: s };
-                win.webContents.send('total-download-progress', { progress: progress })
+                var progress2 = { percent: s, transferredBytes: progress.transferredBytes, totalBytes: progress.totalBytes };
+                win.webContents.send('total-download-progress', { progress: progress2 })
               },
               onCompleted: (item) => {
                 accumulatedSize += item.fileSize;

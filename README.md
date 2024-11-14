@@ -26,6 +26,8 @@ Obsidian-1.4.16-universal.dmg,c0e51932794b743e1bd33c7c48b03c2c
 
 The downloader will test each downloaded file based on the MD5SUM to verify that the download was successful. If the output folder already contains some or all of the files the MD5SUM will be tested again but only new files will download.
 
+The electron.js framework has come a long way since I last used it. It was very easy to add the more advanced features such as drag & drop, display of loaded file on top-middle of screen, use file-load event if start using .fiona, dark/light mode.
+
 
 ## Build  
 
@@ -54,8 +56,8 @@ open http://localhost:3000
 
 
 Feedback 1: 
-- Immediately made the window higher: Window is now higher - more square. 
-- File selection box is in the way: Still opens up automatically but can be canceled and new File/Load function. 
-- Press download button without setting download location: TODO 
+- Immediately made the window higher: Window is now higher - more square (fixed)
+- File selection box is in the way: Still opens up automatically but can be canceled and new File/Load function (fixed). 
+- Press download button without setting download location: TODO (can be cancelled now, fixed)
 - Tried to click on failed row and on "failed" nothing happens: TODO 
-- Cannot close username/password dialog: Added close icon on top right. Changed "Login" to "Login to FIONA".
+- Cannot close username/password dialog: Added close icon on top right. Changed "Login" to "Login to FIONA" (fixed).

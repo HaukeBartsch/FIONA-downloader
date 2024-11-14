@@ -23,6 +23,10 @@ html,body,main,div.container-fluid,div.row {
 	margin-top: -15px;
 }
 
+#download-numbers-wrap {
+	text-align: right;
+}
+
 #downloads span.download-failed {
 	color: red;
 }
