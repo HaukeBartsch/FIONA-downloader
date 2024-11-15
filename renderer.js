@@ -28,11 +28,13 @@ window.electron.receivedTableRow((event, value) => {
     node.id = "item-" + value.id;
     var rowStatus = "download-failed";
     var icon = "";
-    if (value.status == "downloaded") {
+    var statusText = "";
+    if (value.status.downloaded) {
         rowStatus = "download-success";
+        statusText = "downloaded";
         icon = ok_icon;
     }
-    node.innerHTML = "<td class='table-id'>" + icon + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + value.status + "</span></td>";
+    node.innerHTML = "<td class='table-id'>" + icon + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + statusText + "</span></td>";
     table.appendChild(node);
 })
 
@@ -41,15 +43,24 @@ window.electron.updateTableRow((event, value) => {
     var row_id = "item-" + value.id;
     var tr = document.querySelector('#' + row_id);
     var rowStatus = "";
+    var statusText = "";
     var icon = "";
-    if (value.status == "downloaded") {
+    if (value.status.downloaded) {
         rowStatus = "download-success";
+        statusText = "downloaded";
         icon = ok_icon;
     }
     // does this replace all values in the row?
-    tr.innerHTML = "<td class='table-id'>" + icon + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + value.status + "</span></td>";
+    tr.innerHTML = "<td class='table-id'>" + icon + "</td><td class='table-name'>" + value.pathname.slice(0,65) + "</td><td class='table-md5sum'>" + value.MD5SUM.slice(0,6) + "...</td><td class='status'><span class='" + rowStatus + "'>" + statusText + "</span></td>";
 })
 
+window.electron.updateSummary((event, value) => {
+    // add the received text to the window
+    const summary_field = document.getElementById("summary-text");
+    var node = document.createTextNode(value);
+    summary_field.innerHTML = '';
+    summary_field.appendChild(node);
+})
 
 window.electron.getDownloadProgress((event, value) => {
     // go to that row and update the status

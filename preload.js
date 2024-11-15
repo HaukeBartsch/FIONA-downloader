@@ -32,6 +32,9 @@ contextBridge.exposeInMainWorld('electron', {
     receivedTableRow: (callback) => {
         ipcRenderer.on('create-table-row', callback)
     },
+    updateSummary: (callback) => {
+        ipcRenderer.on('update-summary', callback);
+    },
     updateTableRow: (callback) => {
         ipcRenderer.on('update-table-row', callback)
     },

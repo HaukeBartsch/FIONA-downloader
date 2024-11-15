@@ -35,6 +35,17 @@ function getChecksum(path) {
 
 const isMac = process.platform === 'darwin'
 
+function updateSummary(win) {
+
+  var numDownloaded = current_data.reduce(function(a, b) { return a + (b.status.downloaded?1:0)}, 0);
+  var numVerified = current_data.reduce(function(a, b) { return a + (b.status.verified?1:0)}, 0);
+  // check what we have in current_data and send it to the renderer
+  var summaryText = current_data.length + " dataset" + (current_data.length != 1?"s":"") + ", ";
+  summaryText += numDownloaded + " downloaded and " + numVerified + " verified.";
+
+  win.webContents.send('update-summary', summaryText);
+}
+
 
 var current_data = []; // keep a record on the server for what we forward to the viewer
 var current_download_location = "";
@@ -189,7 +200,7 @@ const createWindow = () => {
           }
         });
         
-        //win.webContents.openDevTools();
+        win.webContents.openDevTools();
       }
       
       var illegalRe = /[\/\?<>\\:\*\|":]/g;
@@ -226,14 +237,19 @@ const createWindow = () => {
             continue;
           var pieces = trimmed.split(",")
           // accept this as a filename and send to render to be put into table
-          var status = "";
+          var status = {
+            downloaded: false,
+            verified: false,
+            lastError: ""
+          };
           var p = path.join(current_download_location, pieces[0]);
           if (fs.existsSync(p)) {
-            status = "downloaded";
+            status.downloaded = true;
           }
           var dat = { id: current_data.length, pathname: pieces[0], MD5SUM: pieces[1], status: status };
           current_data[current_data.length] = dat;
           win.webContents.send('create-table-row', dat);
+          updateSummary(win);
         }
         return true;
       }
@@ -301,10 +317,14 @@ const createWindow = () => {
             // TODO: update all the status fields again (files might exist already at these locations)
             for (var i = 0; i < current_data.length; i++) {
               // ask for an update on the status for this item
-              var status = "";
+              var status = {
+                downloaded: false,
+                verified: false,
+                lastError: ""
+              };
               var p = path.join(current_download_location, current_data[i].pathname);
               if (fs.existsSync(p)) {
-                status = "downloaded";
+                status.downloaded = true;
               }
               var dat = { id: current_data[i].id, pathname: current_data[i].pathname, MD5SUM: current_data[i].MD5SUM, status: status };
               win.webContents.send('update-table-row', dat);
@@ -352,17 +372,21 @@ const createWindow = () => {
               await getChecksum(p)
               .then(function(checksum) {
                 if (md5sum == checksum) {
+                  current_data[i].status.verified = true;
                   win.webContents.send("checksum-message", { "ok": "ok", id: id })
                   // create a fake progress
                   var item = { id: current_data[i].id, fileSize: 0 };
                   fs.stat(p, (err, fileStats) => {
                     item.fileSize = fileStats.size;
-                    win.webContents.send("download-exists-at-destination", item)  
+                    win.webContents.send("download-exists-at-destination", item)
+                    current_data[i].status.downloaded = true;  
                   });
                   continueHere = true;
                 } else {
+                  current_data[i].status.verified = false;
                   win.webContents.send("checksum-message", { "ok": "failed", id: id })
                 }
+                updateSummary(win);
               });
               if (continueHere)
                 continue; // skip this entry
@@ -391,20 +415,27 @@ const createWindow = () => {
                 if (typeof current_data != "undefined" && current_data.length > i && typeof current_data[i].id != "undefined") {
                   item.id = current_data[i].id;
                   win.webContents.send("download-complete", item)
+                  current_data[i].status.downloaded = true;
+                  current_data[i].status.fileSize = item.fileSize;
                 }
                 var md5sum = current_data[i].MD5SUM;
                 var id = current_data[i].id;
+                var i_val = i;
                 // check for the MD5SUM and report if that worked as well
                 getChecksum(p)
                 .then(function(checksum) {
                   // compare and alert the authorities
                   if (checksum != md5sum) {
+                    current_data[i_val].status.verified = false;
                     win.webContents.send("checksum-message", { "ok": "failed", id: id })
                   } else {
+                    current_data[i_val].status.verified = true;
                     win.webContents.send("checksum-message", { "ok": "ok", id: id })
                   }
+                  updateSummary(win);
                   console.log(`checksum is ${checksum}`)
                 }).catch(err => console.log(err));
+                updateSummary(win);
               },
               onCancel: (item) => {
                 // download failed
@@ -421,6 +452,7 @@ const createWindow = () => {
               break;
           }
           // all downloads finished
+          updateSummary(win);
           shell.openPath(current_download_location)
         });
         

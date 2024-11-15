@@ -6,6 +6,19 @@ html,body,main,div.container-fluid,div.row {
 	padding-top: 10px;
 }
 
+.left-side-div .region {
+	border: 1px solid lightgrey;
+	border-radius: 5px;
+	padding: 5px;
+	font-size: .8rem;
+	color: lightgrey;
+	margin-top: 5px;
+}
+
+i.svg-logo-button svg {
+	margin-top: -5px;
+}
+
 .right-side-div {
 	padding-top: 10px;
 	display: flex;
@@ -53,6 +66,7 @@ th.status-header {
 	overflow: auto;
 	flex: 1 1 auto;
 }
+
 #tableWrap td {
 	white-space: nowrap;
 }
