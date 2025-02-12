@@ -200,7 +200,7 @@ const createWindow = () => {
           }
         });
         
-        win.webContents.openDevTools();
+        //win.webContents.openDevTools();
       }
       
       var illegalRe = /[\/\?<>\\:\*\|":]/g;

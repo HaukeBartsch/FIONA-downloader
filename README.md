@@ -31,7 +31,16 @@ The electron.js framework has come a long way since I last used it. It was very 
 
 ## Build  
 
-Use electron-builder as a "devDependencies" entry in package.json. Build for all platforms with:
+Download the source code, install the dependencies, run the application with npm.
+
+```bash
+git clone https://github.com/HaukeBartsch/FIONA-downloader.git
+cd FIONA-downloader
+npm install
+npm start
+```
+
+Use electron-builder as a "devDependencies" entry in package.json. Build executables for all platforms with:
 
 ```bash
 # npm run make -- --arch="arm64,x64"
